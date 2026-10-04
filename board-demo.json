@@ -1,0 +1,64 @@
+{
+  "id": "demo",
+  "name": "Sensor board",
+  "variants": [
+    {
+      "id": "std",
+      "name": "Standard"
+    },
+    {
+      "id": "lp",
+      "name": "Low power"
+    }
+  ],
+  "lines": [
+    {
+      "id": "l1",
+      "designators": "C1-C12",
+      "partId": "p1",
+      "qty": 12,
+      "fitted": [
+        "std",
+        "lp"
+      ]
+    },
+    {
+      "id": "l2",
+      "designators": "U1",
+      "partId": "p2",
+      "qty": 1,
+      "fitted": [
+        "std",
+        "lp"
+      ]
+    },
+    {
+      "id": "l3",
+      "designators": "R1-R4",
+      "partId": "p3",
+      "qty": 4,
+      "fitted": [
+        "std",
+        "lp"
+      ]
+    },
+    {
+      "id": "l4",
+      "designators": "R5",
+      "partId": "p3",
+      "qty": 1,
+      "fitted": [
+        "std"
+      ]
+    },
+    {
+      "id": "l5",
+      "designators": "R5",
+      "partId": "p4",
+      "qty": 1,
+      "fitted": [
+        "lp"
+      ]
+    }
+  ]
+}

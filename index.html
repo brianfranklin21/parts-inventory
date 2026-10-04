@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCB component inventory</title>
+<style>
+:root{--bg:#f3f5f2;--panel:#fff;--ink:#1b2420;--mute:#66726b;--line:#d5dcd7;--mask:#1d5c47;--mask-ink:#fff;--short:#b5561a;--short-bg:#fbeadd;--ok:#2f7a4f}
+@media(prefers-color-scheme:dark){:root{--bg:#121916;--panel:#1a2420;--ink:#e6ece8;--mute:#93a29a;--line:#2f3d37;--mask:#3f9a7a;--mask-ink:#08130e;--short:#f0925a;--short-bg:#3a2619;--ok:#6cc596}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Segoe UI",system-ui,-apple-system,sans-serif}
+header{background:var(--mask);color:var(--mask-ink);padding:14px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:20px;font-weight:600;letter-spacing:.2px}
+header small{opacity:.8;display:block;font-weight:400}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button,select,input,textarea{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--panel);padding:6px 12px;border-radius:6px;cursor:pointer}
+button:hover{border-color:var(--mask)}
+button.primary{background:var(--mask);color:var(--mask-ink);border-color:var(--mask)}
+header button{background:transparent;color:var(--mask-ink);border-color:rgba(255,255,255,.45)}
+header button:hover{background:rgba(255,255,255,.15)}
+header button.primary{background:var(--mask-ink);color:var(--mask);}
+button.danger{color:var(--short)}
+:focus-visible{outline:2px solid var(--short);outline-offset:2px}
+main{max-width:1200px;margin:0 auto;padding:16px 20px 60px}
+#banner,#stale{display:none;background:var(--short-bg);border:1px solid var(--short);color:var(--ink);padding:10px 14px;border-radius:6px;margin-bottom:14px}
+#banner.show,#stale.show{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.tools input[type=search]{flex:1;min-width:200px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.stat{color:var(--mute);margin-left:auto}
+.wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+th{cursor:pointer;user-select:none;font-weight:600;position:sticky;top:0;background:var(--panel)}
+th .arr{color:var(--mask)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:color-mix(in srgb,var(--mask) 8%,transparent)}
+tr.short td:first-child{box-shadow:inset 4px 0 var(--short)}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--short-bg);color:var(--short);border:1px solid var(--short)}
+.tag.ok{background:transparent;color:var(--ok);border-color:var(--ok)}
+td.des{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:0;width:min(560px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{padding:18px 20px;display:grid;gap:12px;max-height:85vh;overflow:auto}
+dialog h2{margin:0;font-size:18px}
+label{display:grid;gap:4px;font-size:13px;color:var(--mute)}
+label input,label select,label textarea{padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font-size:15px}
+.row{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.row .sp{margin-right:auto}
+.frow{display:grid;grid-template-columns:1fr 110px 1fr auto;gap:6px;align-items:end}
+.frow input,.frow select{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);width:100%}
+.frow .btns{display:flex;gap:2px}
+.frow .btns button{padding:5px 8px}
+.help{color:var(--mute);font-size:13px}
+.help code{background:var(--bg);padding:1px 5px;border-radius:4px}
+a{color:var(--mask)}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 16px}
+.tabs button[aria-selected=true]{border-bottom-color:var(--mask);font-weight:600}
+.chip{border-radius:99px;padding:4px 12px}.chip.on{background:var(--mask);color:var(--mask-ink);border-color:var(--mask)}
+th.act{color:var(--mask)}
+.tools select{padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+td select,td input[data-k]{padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+td input[data-k=count]{width:80px;text-align:right}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.frow{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">PCB component inventory<small id="sub"></small></h1>
+  <div class="bar">
+    <button id="exportJson" class="primary">Export changes</button>
+    <button id="import">Import JSON</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+    <input type="file" id="bomFile" accept=".csv,.tsv,.txt,text/csv" hidden>
+  </div>
+</header>
+<main>
+  <div id="banner"><span><b>You have unsaved changes</b> in <span id="chg"></span>. Export them and commit the files to publish to the team.</span><span class="bar"><button id="exp2" class="primary">Export changes</button><button id="discard" class="danger">Discard changes</button></span></div>
+  <div id="stale"><span><b>Newer versions of <span id="stl"></span> were committed since you started this draft.</b> Exporting now would overwrite them.</span><span class="bar"><button id="sLoad" class="primary">Discard my draft, load latest</button><button id="sKeep">Keep my draft</button></span></div>
+  <nav class="tabs" role="tablist"><button id="tab-parts" role="tab">Components</button><button id="tab-boards" role="tab">Boards</button><button id="tab-builds" role="tab">Builds</button></nav>
+  <section id="v-parts"><div class="tools">
+    <button id="add" class="primary">Add component</button><button id="settings">Configure fields</button><button id="exportCsv">Export CSV</button>
+    <input type="search" id="q" placeholder="Search designator, value, MPN…" aria-label="Search">
+    <label style="display:flex;align-items:center;gap:6px;flex-direction:row;color:var(--ink);font-size:15px"><input type="checkbox" id="shortOnly"> Short only</label>
+    <span class="stat" id="stat"></span>
+  </div>
+  <div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table><div id="empty" class="empty" hidden></div></div>
+  <p class="help">Needed quantities are calculated from the planned builds on the Builds tab. Changes stay as a draft in this browser until you export them.</p></section>
+  <section id="v-boards" hidden>
+    <div class="tools"><select id="bsel" aria-label="Board"></select><button id="bnew" class="primary">New board</button><button id="bren">Rename</button><button id="bdel" class="danger">Delete</button><span id="vchips" class="bar"></span><button id="vadd">Add variant</button><button id="vren">Rename variant</button><button id="vdel" class="danger">Delete variant</button></div>
+    <div class="tools"><button id="importBom">Import Altium BOM into selected variant</button><button id="ladd">Add line</button><span class="stat" id="bstat"></span></div>
+    <div class="wrap"><table><thead id="bthead"></thead><tbody id="btbody"></tbody></table><div id="bempty" class="empty"></div></div>
+    <p class="help">Tick a variant's box to fit that line in the variant. If a part differs between variants, use two lines with different parts. Export one BOM per variant from Altium (its variant-aware BOM leaves out unfitted parts).</p>
+  </section>
+  <section id="v-builds" hidden>
+    <div class="tools"><button id="badd" class="primary">Add build</button><span class="help">Each build is a quantity of one board variant. They drive the Needed column and the shopping list.</span></div>
+    <div class="wrap"><table><thead><tr><th>Board</th><th>Variant</th><th class="n">Boards to build</th><th>Note</th><th></th></tr></thead><tbody id="bld"></tbody></table><div id="bldEmpty" class="empty">No builds planned yet.</div></div>
+    <h2 style="font-size:17px;margin:22px 0 8px">Shopping list</h2>
+    <div class="tools"><button id="shopCsv">Export CSV</button></div>
+    <div class="wrap"><table><thead><tr><th>Component</th><th class="n">Needed</th><th class="n">On hand</th><th class="n">To order</th><th>Used on</th></tr></thead><tbody id="shop"></tbody></table><div id="shopEmpty" class="empty"></div></div>
+  </section>
+</main>
+
+<dialog id="itemDlg"><form method="dialog" id="itemForm"></form></dialog>
+<dialog id="setDlg"><form method="dialog" id="setForm"></form></dialog>
+<dialog id="mapDlg"><form method="dialog" id="mapForm"></form></dialog>
+<dialog id="lineDlg"><form method="dialog" id="lineForm"></form></dialog>
+
+<script>
+const DRAFT='pcbinv2-draft',PARTS='parts.json',MAN='manifest.json',BLD='builds.json';
+const FALLBACK={schema:{project:'My PCB project',haveKey:'onhand',fields:[
+ {key:'value',label:'Value',type:'text'},
+ {key:'mpn',label:'MPN',type:'text'},{key:'package',label:'Package',type:'text'},
+ {key:'datasheet',label:'Datasheet',type:'url'},{key:'onhand',label:'On hand',type:'number'}]},items:[]};
+let F={},C={},B={},latest={},stale=[],data=null,tab='parts',cur={board:null,variant:null},N={},U={},sort={key:null,dir:1};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+const J=JSON.stringify,bf=id=>`board-${id}.json`;
+const hash=t=>{let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return String(h>>>0);};
+const DEF=p=>p===PARTS?clone(FALLBACK):p===BLD?{builds:[]}:p===MAN?{project:'My PCB project',boards:[]}:{id:p.slice(6,-5),name:'Board',variants:[{id:'v0',name:'Base'}],lines:[]};
+async function get(p){try{const r=await fetch(p+'?'+Date.now(),{cache:'no-store'});if(!r.ok)return null;const t=await r.text();return{d:JSON.parse(t),h:hash(t)};}catch{return null;}}
+async function fetchAll(){
+  const out={},m=(await get(MAN))||{d:DEF(MAN),h:'none'};out[MAN]=m;
+  await Promise.all([PARTS,BLD,...(m.d.boards||[]).map(b=>bf(b.id))].map(async p=>{out[p]=(await get(p))||{d:DEF(p),h:'none'};}));
+  return out;
+}
+const dirtyPaths=()=>Object.keys(F).filter(p=>J(F[p])!==J(C[p]));
+const adopt1=p=>{C[p]=latest[p].d;F[p]=clone(latest[p].d);B[p]=latest[p].h;};
+async function init(){
+  const L=await fetchAll();latest=L;C={};B={};
+  for(const p in L){C[p]=L[p].d;B[p]=L[p].h;}
+  F=clone(C);stale=[];
+  let dr=null;try{dr=JSON.parse(localStorage.getItem(DRAFT));}catch{}
+  if(dr&&dr.data)for(const p in dr.data){
+    if(J(dr.data[p])===J(C[p]))continue;
+    F[p]=dr.data[p];B[p]=dr.base?dr.base[p]:undefined;
+    if(B[p]!==(L[p]?L[p].h:undefined))stale.push(p);
+  }
+  save();
+}
+async function checkStale(){
+  const L=await fetchAll();latest=L;const dp=dirtyPaths();
+  for(const p in L){if(L[p].h===B[p])continue;if(!dp.includes(p)||J(F[p])===J(L[p].d))adopt1(p);}
+  stale=dirtyPaths().filter(p=>L[p]&&L[p].h!==B[p]);
+  stale.forEach(p=>C[p]=L[p].d);
+  save();return stale.length>0;
+}
+function save(){
+  const dp=dirtyPaths();
+  try{if(dp.length)localStorage.setItem(DRAFT,J({base:B,data:Object.fromEntries(dp.map(p=>[p,F[p]]))}));else localStorage.removeItem(DRAFT);}catch{}
+  render();
+}
+const num=v=>Number(v)||0;
+const need=it=>N[it.id]||0;
+const isShort=it=>need(it)>num(it[data.schema.haveKey]);
+
+function calc(){
+  N={};U={};
+  F[BLD].builds.forEach(b=>{const bd=F[bf(b.board)];if(bd)bd.lines.forEach(l=>{if(l.fitted.includes(b.variant))N[l.partId]=(N[l.partId]||0)+num(l.qty)*num(b.count);});});
+  F[MAN].boards.forEach(m=>{const bd=F[bf(m.id)];if(bd)bd.lines.forEach(l=>(U[l.partId]=U[l.partId]||new Set()).add(m.name));});
+}
+const th=(k,l,n)=>`<th data-k="${esc(k)}" class="${n?'n':''}">${esc(l)}${sort.key===k?` <span class="arr">${sort.dir>0?'▲':'▼'}</span>`:''}</th>`;
+const plabel=p=>p?data.schema.fields.filter(f=>f.type==='text'||f.type==='select').map(f=>p[f.key]).filter(Boolean).slice(0,3).join(', '):'(missing component)';
+const partOf=id=>data.items.find(x=>x.id===id);
+function render(){
+  data=F[PARTS];calc();
+  $('title').firstChild.textContent=(F[MAN].project||'PCB')+' inventory';
+  const dp=dirtyPaths();
+  $('banner').classList.toggle('show',dp.length>0);$('chg').textContent=dp.join(', ');
+  $('stale').classList.toggle('show',stale.length>0);$('stl').textContent=stale.join(', ');
+  $('exportJson').textContent=dp.length?`Export changes (${dp.length})`:'Export changes';
+  ['parts','boards','builds'].forEach(t=>{$('tab-'+t).setAttribute('aria-selected',t===tab);$('v-'+t).hidden=t!==tab;});
+  ({parts:renderParts,boards:renderBoards,builds:renderBuilds})[tab]();
+}
+function renderParts(){
+  const s=data.schema,cols=s.fields,q=$('q').value.trim().toLowerCase(),so=$('shortOnly').checked;
+  $('thead').innerHTML='<tr>'+cols.map(f=>th(f.key,f.label,f.type==='number')).join('')+th('_need','Needed',1)+'<th>Status</th><th>Used on</th></tr>';
+  const get=(it,k)=>k==='_need'?need(it):it[k]??'';
+  let rows=data.items.filter(it=>(!so||isShort(it))&&(!q||cols.some(f=>String(it[f.key]??'').toLowerCase().includes(q))));
+  if(sort.key){const nf=sort.key==='_need'||(cols.find(c=>c.key===sort.key)||{}).type==='number';rows.sort((a,b)=>{const x=get(a,sort.key),y=get(b,sort.key);return(nf?num(x)-num(y):String(x).localeCompare(String(y),undefined,{numeric:true}))*sort.dir;});}
+  $('tbody').innerHTML=rows.map(it=>{const n=need(it),h=num(it[s.haveKey]);return`<tr data-id="${it.id}" class="${isShort(it)?'short':''}" tabindex="0">`+cols.map(f=>`<td class="${f.type==='number'?'n':''}">${cell(f,it)}</td>`).join('')+`<td class="n">${n||''}</td><td>${n?(n>h?`<span class="tag">Short ${n-h}</span>`:'<span class="tag ok">OK</span>'):''}</td><td>${esc(U[it.id]?[...U[it.id]].join(', '):'')}</td></tr>`;}).join('');
+  const e=$('empty');e.hidden=rows.length>0;
+  e.textContent=data.items.length?'No components match the current search or filter.':'No components yet. Add one, or import a BOM on the Boards tab.';
+  $('stat').textContent=`${data.items.length} components, ${data.items.filter(isShort).length} short`;
+}
+function usageHtml(id){
+  if(!id)return'';
+  const rows=[],bn=new Set();
+  F[MAN].boards.forEach(m=>{const bd=F[bf(m.id)];if(bd)bd.lines.filter(l=>l.partId===id).forEach(l=>{bn.add(m.name);rows.push(`<tr><td>${esc(m.name)}</td><td>${esc(l.designators)}</td><td class="n">${esc(l.qty)}</td><td>${esc(bd.variants.filter(v=>l.fitted.includes(v.id)).map(v=>v.name).join(', ')||'none')}</td></tr>`);});});
+  const p=partOf(id),n=need(p),h=num(p[data.schema.haveKey]);
+  return`<div><b>Used on ${bn.size} board${bn.size===1?'':'s'}</b>${rows.length?`<div class="wrap" style="margin-top:6px"><table><thead><tr><th>Board</th><th>Designators</th><th class="n">Qty</th><th>Fitted in</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`:'<p class="help">Not on any BOM yet.</p>'}<p class="help">Planned builds need ${n}; on hand ${h}${n>h?`, so ${n-h} short`:''}.</p></div>`;
+}
+function curBoard(){const m=F[MAN].boards;if(!m.length)return null;if(!m.some(b=>b.id===cur.board))cur.board=m[0].id;return F[bf(cur.board)];}
+function renderBoards(){
+  const bd=curBoard(),m=F[MAN].boards;
+  $('bsel').innerHTML=m.map(b=>`<option value="${b.id}"${b.id===cur.board?' selected':''}>${esc(b.name)}</option>`).join('');
+  ['bren','bdel','vadd','vren','vdel','importBom','ladd'].forEach(i=>$(i).disabled=!bd);
+  const e=$('bempty');
+  if(!bd){$('vchips').innerHTML='';$('bthead').innerHTML='';$('btbody').innerHTML='';$('bstat').textContent='';e.hidden=false;e.textContent='No boards yet. Select “New board”, then import its BOM from Altium.';return;}
+  if(!bd.variants.some(v=>v.id===cur.variant))cur.variant=bd.variants[0].id;
+  const vs=bd.variants;
+  $('vchips').innerHTML=vs.map(v=>`<button class="chip${v.id===cur.variant?' on':''}" data-v="${v.id}">${esc(v.name)}</button>`).join('');
+  $('bthead').innerHTML='<tr><th>Designators</th><th>Component</th><th class="n">Qty per board</th>'+vs.map(v=>`<th class="n${v.id===cur.variant?' act':''}">${esc(v.name)}</th>`).join('')+'</tr>';
+  const lines=[...bd.lines].sort((a,b)=>String(a.designators).localeCompare(String(b.designators),undefined,{numeric:true}));
+  $('btbody').innerHTML=lines.map(l=>`<tr data-l="${l.id}" tabindex="0"><td>${esc(l.designators)}</td><td>${esc(plabel(partOf(l.partId)))}</td><td class="n">${esc(l.qty)}</td>`+vs.map(v=>`<td class="n"><input type="checkbox" data-v="${v.id}"${l.fitted.includes(v.id)?' checked':''} aria-label="Fitted in ${esc(v.name)}"></td>`).join('')+'</tr>').join('');
+  e.hidden=lines.length>0;e.textContent='No BOM lines yet. Import a BOM for the selected variant, or add a line.';
+  $('bstat').textContent=`${lines.length} lines`;
+}
+function renderBuilds(){
+  const bl=F[BLD].builds,bs=F[MAN].boards,s=data.schema;
+  $('bld').innerHTML=bl.map(b=>{const bd=F[bf(b.board)];return`<tr data-id="${b.id}"><td><select data-k="board">${bs.map(x=>`<option value="${x.id}"${x.id===b.board?' selected':''}>${esc(x.name)}</option>`).join('')}</select></td><td><select data-k="variant">${(bd?bd.variants:[]).map(v=>`<option value="${v.id}"${v.id===b.variant?' selected':''}>${esc(v.name)}</option>`).join('')}</select></td><td class="n"><input data-k="count" type="number" min="0" value="${esc(b.count)}"></td><td><input data-k="note" value="${esc(b.note)}" placeholder="Note"></td><td><button data-a="del" class="danger">Remove</button></td></tr>`;}).join('');
+  $('bldEmpty').hidden=bl.length>0;
+  const sh=data.items.filter(isShort).sort((a,b)=>plabel(a).localeCompare(plabel(b)));
+  $('shop').innerHTML=sh.map(p=>`<tr><td>${esc(plabel(p))}</td><td class="n">${need(p)}</td><td class="n">${num(p[s.haveKey])}</td><td class="n"><b>${need(p)-num(p[s.haveKey])}</b></td><td>${esc([...(U[p.id]||[])].join(', '))}</td></tr>`).join('');
+  $('shopEmpty').hidden=sh.length>0;$('shopEmpty').textContent=bl.length?'Nothing to order: stock covers every planned build.':'Add a build above to see what you need to order.';
+}
+$('thead').onclick=e=>{const th=e.target.closest('th[data-k]');if(!th)return;const k=th.dataset.k;sort=sort.key===k?{key:k,dir:-sort.dir}:{key:k,dir:1};render();};
+$('q').oninput=render;$('shortOnly').onchange=render;
+$('tbody').onclick=e=>{if(e.target.closest('a'))return;const tr=e.target.closest('tr');if(tr)editItem(tr.dataset.id);};
+$('tbody').onkeydown=e=>{if(e.key==='Enter'&&e.target.dataset.id)editItem(e.target.dataset.id);};
+$('add').onclick=()=>editItem(null);
+
+function fieldInput(f,v){
+  const n=`name="${esc(f.key)}"`;
+  if(f.type==='select')return`<select ${n}><option value=""></option>${(f.options||[]).map(o=>`<option${o===v?' selected':''}>${esc(o)}</option>`).join('')}${v&&!(f.options||[]).includes(v)?`<option selected>${esc(v)}</option>`:''}</select>`;
+  if(f.type==='number')return`<input ${n} type="number" step="any" value="${esc(v)}">`;
+  if(f.type==='url')return`<input ${n} type="url" placeholder="https://…" value="${esc(v)}">`;
+  if(f.type==='longtext')return`<textarea ${n} rows="3">${esc(v)}</textarea>`;
+  return`<input ${n} type="text" value="${esc(v)}">`;
+}
+function editItem(id){
+  const it=id?data.items.find(x=>x.id===id):{};
+  const f=$('itemForm');
+  f.innerHTML=`<h2>${id?'Edit component':'Add component'}</h2>`+data.schema.fields.map(fl=>`<label>${esc(fl.label)}${fieldInput(fl,it[fl.key])}</label>`).join('')+
+  usageHtml(id)+`<div class="row">${id?'<button type="button" class="danger sp" id="del">Delete</button>':''}<button type="button" id="cancel">Cancel</button><button class="primary" value="save">Save</button></div>`;
+  $('itemDlg').showModal();
+  $('cancel').onclick=()=>$('itemDlg').close();
+  if(id)$('del').onclick=()=>{if(U[id]){alert('This component is used on: '+[...U[id]].join(', ')+'. Remove it from those BOMs first.');return;}if(confirm('Delete this component?')){data.items=data.items.filter(x=>x.id!==id);$('itemDlg').close();save();}};
+  f.onsubmit=ev=>{
+    const fd=new FormData(f);const o=id?it:{id:uid()};
+    data.schema.fields.forEach(fl=>{const v=fd.get(fl.key);o[fl.key]=fl.type==='number'?(v===''||v===null?'':Number(v)):v;});
+    if(!id)data.items.push(o);save();
+  };
+}
+
+// ---- field configuration ----
+let draftSchema=null;
+$('settings').onclick=()=>{draftSchema=clone(data.schema);drawSettings();$('setDlg').showModal();};
+function drawSettings(){
+  const s=draftSchema,f=$('setForm');
+  const numF=s.fields.filter(x=>x.type==='number');
+  f.innerHTML=`<h2>Configure fields</h2>
+  <label>Project name<input id="sp" value="${esc(s.project)}"></label>
+  <div id="flist">${s.fields.map((x,i)=>`<div class="frow" data-i="${i}">
+    <label>Label<input data-p="label" value="${esc(x.label)}"></label>
+    <label>Type<select data-p="type">${['text','longtext','number','select','url'].map(t=>`<option value="${t}"${t===x.type?' selected':''}>${{text:'Text',longtext:'Long text',number:'Number',select:'Choice',url:'Link'}[t]}</option>`).join('')}</select></label>
+    <label>${x.type==='select'?'Choices (comma-separated)':''}${x.type==='select'?`<input data-p="options" value="${esc((x.options||[]).join(', '))}">`:''}</label>
+    <div class="btns"><button type="button" data-a="up" title="Move up">↑</button><button type="button" data-a="down" title="Move down">↓</button><button type="button" data-a="rm" class="danger" title="Remove field">✕</button></div></div>`).join('')}</div>
+  <div><button type="button" id="addf">Add field</button></div>
+  <label>Quantity on hand field<select id="hk"><option value="">None</option>${numF.map(x=>`<option value="${x.key}"${x.key===s.haveKey?' selected':''}>${esc(x.label)}</option>`).join('')}</select></label>
+  <p class="help">Needed quantities come from the planned builds, and a component is flagged Short when on hand is lower. Removing a field deletes its values from every component when you save.</p>
+  <div class="row"><button type="button" id="scancel">Cancel</button><button class="primary" value="save">Save fields</button></div>`;
+  $('scancel').onclick=()=>$('setDlg').close();
+  $('addf').onclick=()=>{sync();let n=1,k;do{k='field'+n++}while(s.fields.some(x=>x.key===k));s.fields.push({key:k,label:'New field',type:'text'});drawSettings();};
+  f.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{sync();const i=+b.closest('.frow').dataset.i,a=b.dataset.a;
+    if(a==='rm')s.fields.splice(i,1);
+    else{const j=a==='up'?i-1:i+1;if(j>=0&&j<s.fields.length)[s.fields[i],s.fields[j]]=[s.fields[j],s.fields[i]];}
+    drawSettings();});
+  f.querySelectorAll('select[data-p="type"]').forEach(sel=>sel.onchange=()=>{sync();drawSettings();});
+  f.onsubmit=()=>{sync();
+    const old=data.schema.fields.map(x=>x.key),keep=s.fields.map(x=>x.key);
+    data.items.forEach(it=>old.filter(k=>!keep.includes(k)).forEach(k=>delete it[k]));
+    s.haveKey=$('hk').value;data.schema=s;save();};
+}
+function sync(){
+  const s=draftSchema;s.project=$('sp').value;
+  $('setForm').querySelectorAll('.frow').forEach(r=>{const x=s.fields[+r.dataset.i];
+    r.querySelectorAll('[data-p]').forEach(el=>{const p=el.dataset.p;x[p]=p==='options'?el.value.split(',').map(t=>t.trim()).filter(Boolean):el.value;});
+    if(x.type!=='select')delete x.options;});
+  s.haveKey=$('hk').value;
+}
+
+// ---- import / export ----
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();URL.revokeObjectURL(a.href);}
+async function exportJson(){
+  if(await checkStale()&&!confirm('Some files changed in the repo since you started this draft. Export anyway and overwrite the newer versions?'))return;
+  const dp=dirtyPaths();if(!dp.length){alert('There are no changes to export.');return;}
+  for(const p of dp){download(p,J(F[p],null,2)+'\n','application/json');await new Promise(r=>setTimeout(r,350));}
+}
+$('exportJson').onclick=exportJson;$('exp2').onclick=exportJson;
+$('exportCsv').onclick=()=>{
+  const cols=data.schema.fields,q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+  download('inventory.csv',[cols.map(c=>q(c.label)).join(','),...data.items.map(it=>cols.map(c=>q(it[c.key])).join(','))].join('\n'),'text/csv');
+};
+$('import').onclick=()=>$('file').click();
+$('file').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{
+    const d=JSON.parse(await f.text());let p;
+    if(d.schema&&Array.isArray(d.items)){p=PARTS;const nk=d.schema.neededKey;if(nk){d.schema.fields=d.schema.fields.filter(x=>x.key!==nk);d.items.forEach(i=>delete i[nk]);}delete d.schema.neededKey;delete d.meta;}
+    else if(d.id&&Array.isArray(d.lines)&&Array.isArray(d.variants))p=bf(d.id);
+    else if(Array.isArray(d.builds))p=BLD;
+    else if(Array.isArray(d.boards))p=MAN;
+    else throw 0;
+    if(!confirm(`Replace the working copy of ${p} with this file?`))return;
+    if(p.startsWith('board-')&&!F[MAN].boards.some(b=>b.id===d.id))F[MAN].boards.push({id:d.id,name:d.name});
+    F[p]=d;save();
+  }catch{alert('That file is not a recognised inventory file (components, board, builds or manifest JSON).');}
+};
+$('discard').onclick=()=>{if(!confirm('Discard all unsaved changes and go back to the committed files?'))return;for(const p of dirtyPaths()){if(latest[p])adopt1(p);else delete F[p];}stale=[];save();};
+$('sLoad').onclick=()=>{if(confirm('Discard your draft of these files and load the latest committed versions?')){stale.forEach(adopt1);stale=[];save();}};
+$('sKeep').onclick=()=>{stale.forEach(p=>B[p]=latest[p].h);stale=[];save();};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkStale();});
+// ---- altium bom ----
+function parseCSV(t){
+  t=t.replace(/^\uFEFF/,'');
+  const lines=t.split(/\r?\n/),hl=lines.find(l=>/designator|comment/i.test(l))||lines.find(l=>l.trim())||'';
+  const d=[',',';','\t'].map(c=>[c,hl.split(c).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows=[];let r=[],c='',q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){c+='"';i++;}else q=false;}else c+=ch;}
+    else if(ch==='"')q=true;
+    else if(ch===d){r.push(c);c='';}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&t[i+1]==='\n')i++;r.push(c);c='';rows.push(r);r=[];}
+    else c+=ch;}
+  if(c||r.length){r.push(c);rows.push(r);}
+  return rows.filter(x=>x.some(v=>v.trim()));
+}
+const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,'');
+const SYN=[['designator','designators','refdes'],['comment','value'],['manufacturerpartnumber','manufacturerpartnumber1','mpn','mfrpartnumber','mfrpn'],['footprint','package'],['quantity','qty','needed'],['description','notes'],['datasheet','helpurl','datasheeturl'],['supplier','supplier1','vendor'],['manufacturer','manufacturer1','mfr']];
+function guess(f,hdr,used){
+  const ks=[norm(f.label),norm(f.key)];
+  let i=hdr.findIndex((h,j)=>!used.has(j)&&ks.includes(norm(h)));
+  if(i<0)i=hdr.findIndex((h,j)=>!used.has(j)&&SYN.some(g=>g.includes(norm(h))&&ks.some(k=>g.includes(k))));
+  if(i>=0)used.add(i);return i;
+}
+const nl=x=>String(x??'').trim().toLowerCase();
+$('importBom').onclick=()=>$('bomFile').click();
+let bm=null;
+$('bomFile').onchange=async e=>{
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  const bd=curBoard(),s=data.schema;if(!bd)return;
+  const rows=parseCSV(await file.text());
+  const hi=Math.max(0,rows.findIndex(r=>r.some(v=>/^designator$/i.test(v.trim()))));
+  if(rows.length<hi+2){alert('No BOM rows found. In Altium, export the Bill of Materials as CSV and try again.');return;}
+  const hdr=rows[hi].map(h=>h.trim()),used=new Set();
+  const m={_d:guess({label:'Designator',key:'designator'},hdr,used),_q:guess({label:'Quantity',key:'quantity'},hdr,used)};
+  s.fields.filter(x=>x.key!==s.haveKey).forEach(x=>m[x.key]=guess(x,hdr,used));
+  bm={rows:rows.slice(hi+1),hdr,m};drawMap();$('mapDlg').showModal();
+};
+function bomEnt(){
+  const s=data.schema,{rows,m}=bm;
+  return rows.map(r=>{
+    const o={};for(const k in m)if(k[0]!=='_'&&m[k]>=0){let v=(r[m[k]]??'').trim();if(s.fields.find(x=>x.key===k).type==='number'){v=v===''?'':Number(v.replace(/,/g,''));if(Number.isNaN(v))v='';}o[k]=v;}
+    const des=m._d>=0?(r[m._d]??'').trim():'',q=m._q>=0?(r[m._q]??'').trim():'';
+    return{o,des,qty:q!==''?num(q):des.split(/[\s,]+/).filter(Boolean).length};
+  }).filter(x=>x.des);
+}
+function bomFind(o){
+  const mk=data.schema.fields.find(x=>/mpn|manufacturerpartnumber/.test(norm(x.key+x.label)))?.key;
+  return mk&&nl(o[mk])?data.items.find(p=>nl(p[mk])===nl(o[mk])):data.items.find(p=>nl(p.value)&&nl(p.value)===nl(o.value)&&nl(p.package)===nl(o.package));
+}
+function mapSum(){
+  const ent=bomEnt(),hit=ent.filter(x=>bomFind(x.o)).length,bd=curBoard(),vn=bd.variants.find(v=>v.id===cur.variant).name;
+  $('msum').textContent=bm.m._d<0?'Choose the column that holds the designators.':`This replaces the “${vn}” BOM of ${bd.name} with ${ent.length} lines: ${hit} match existing components and ${ent.length-hit} will be added as new. On-hand counts are not changed.`;
+  $('mprev').textContent=ent.length?'Preview: '+ent.slice(0,3).map(x=>`${x.des} (×${x.qty}) ${plabel(x.o)}`).join('  /  '):'';
+  $('mgo').disabled=bm.m._d<0||!ent.length;
+}
+function drawMap(){
+  const f=$('mapForm'),s=data.schema,fl=s.fields.filter(x=>x.key!==s.haveKey);
+  const opt=(k,none)=>`<option value="-1">${none}</option>`+bm.hdr.map((h,j)=>`<option value="${j}"${bm.m[k]===j?' selected':''}>${esc(h)}</option>`).join('');
+  f.innerHTML=`<h2>Import Altium BOM</h2><p class="help">Check which file column feeds each field. Components are matched by MPN, or by value and package when there is no MPN.</p>
+  <div class="g2"><label>Designators<select data-f="_d">${opt('_d','Not in file')}</select></label><label>Quantity per board<select data-f="_q">${opt('_q','Count the designators')}</select></label>${fl.map(x=>`<label>${esc(x.label)}<select data-f="${esc(x.key)}">${opt(x.key,'Not imported')}</select></label>`).join('')}</div>
+  <p class="help" id="mprev"></p><p class="help" id="msum"></p>
+  <div class="row"><button type="button" id="mcancel">Cancel</button><button class="primary" id="mgo" value="go">Import</button></div>`;
+  $('mcancel').onclick=()=>$('mapDlg').close();
+  f.onchange=e=>{bm.m[e.target.dataset.f]=+e.target.value;mapSum();};
+  f.onsubmit=()=>bomApply();
+  mapSum();
+}
+function bomApply(){
+  const bd=curBoard(),s=data.schema,ent=bomEnt(),vid=cur.variant;
+  const had=new Set(bd.lines.filter(l=>l.fitted.includes(vid)).map(l=>l.id));
+  bd.lines.forEach(l=>l.fitted=l.fitted.filter(x=>x!==vid));
+  ent.forEach(x=>{
+    let p=bomFind(x.o);if(!p){p={id:uid(),...x.o};if(s.haveKey)p[s.haveKey]=0;data.items.push(p);}
+    let l=bd.lines.find(l=>l.partId===p.id&&nl(l.designators)===nl(x.des));
+    if(!l){l={id:uid(),partId:p.id,designators:x.des,qty:x.qty,fitted:[]};bd.lines.push(l);}
+    l.qty=x.qty;if(!l.fitted.includes(vid))l.fitted.push(vid);
+  });
+  bd.lines=bd.lines.filter(l=>l.fitted.length||!had.has(l.id));
+  save();
+}
+function editLine(l){
+  const bd=curBoard(),parts=[...data.items].sort((a,b)=>plabel(a).localeCompare(plabel(b))),f=$('lineForm');
+  if(!parts.length){alert('Add a component first, or import a BOM.');return;}
+  f.innerHTML=`<h2>${l?'Edit BOM line':'Add BOM line'}</h2>
+  <label>Designators<input name="d" value="${esc(l?l.designators:'')}" placeholder="C1, C2, C3"></label>
+  <label>Component<select name="p">${parts.map(p=>`<option value="${p.id}"${l&&p.id===l.partId?' selected':''}>${esc(plabel(p))}</option>`).join('')}</select></label>
+  <label>Quantity per board<input name="q" type="number" min="0" step="1" value="${esc(l?l.qty:1)}"></label>
+  <div class="row">${l?'<button type="button" class="danger sp" id="ldel">Delete</button>':''}<button type="button" id="lcancel">Cancel</button><button class="primary" value="save">Save</button></div>`;
+  $('lineDlg').showModal();
+  $('lcancel').onclick=()=>$('lineDlg').close();
+  if(l)$('ldel').onclick=()=>{if(confirm('Delete this BOM line?')){bd.lines=bd.lines.filter(x=>x!==l);$('lineDlg').close();save();}};
+  f.onsubmit=()=>{const fd=new FormData(f),o=l||{id:uid(),fitted:[cur.variant]};o.designators=fd.get('d').trim();o.partId=fd.get('p');o.qty=num(fd.get('q'));if(!l)bd.lines.push(o);save();};
+}
+const ask=(t,d)=>{const n=prompt(t,d);return n&&n.trim()?n.trim():null;};
+$('bsel').onchange=e=>{cur.board=e.target.value;render();};
+$('bnew').onclick=()=>{const n=ask('Board name');if(!n)return;const id=uid();F[MAN].boards.push({id,name:n});F[bf(id)]={id,name:n,variants:[{id:'v'+uid(),name:'Base'}],lines:[]};cur.board=id;save();};
+$('bren').onclick=()=>{const bd=curBoard(),n=ask('Board name',bd.name);if(!n)return;bd.name=n;F[MAN].boards.find(b=>b.id===bd.id).name=n;save();};
+$('bdel').onclick=()=>{const bd=curBoard();if(!confirm(`Delete board “${bd.name}”, its BOM and its planned builds? When you commit, also delete ${bf(bd.id)} from the repo.`))return;F[MAN].boards=F[MAN].boards.filter(b=>b.id!==bd.id);F[BLD].builds=F[BLD].builds.filter(x=>x.board!==bd.id);delete F[bf(bd.id)];save();};
+$('vchips').onclick=e=>{const c=e.target.closest('[data-v]');if(c){cur.variant=c.dataset.v;render();}};
+$('vadd').onclick=()=>{const bd=curBoard(),n=ask('New variant name (starts as a copy of the selected variant)');if(!n)return;const id='v'+uid();bd.variants.push({id,name:n});bd.lines.forEach(l=>{if(l.fitted.includes(cur.variant))l.fitted.push(id);});cur.variant=id;save();};
+$('vren').onclick=()=>{const v=curBoard().variants.find(x=>x.id===cur.variant),n=ask('Variant name',v.name);if(!n)return;v.name=n;save();};
+$('vdel').onclick=()=>{const bd=curBoard();if(bd.variants.length<2){alert('A board needs at least one variant.');return;}const v=bd.variants.find(x=>x.id===cur.variant);if(!confirm(`Delete variant “${v.name}” and its planned builds?`))return;bd.variants=bd.variants.filter(x=>x!==v);bd.lines.forEach(l=>l.fitted=l.fitted.filter(x=>x!==v.id));F[BLD].builds=F[BLD].builds.filter(b=>!(b.board===bd.id&&b.variant===v.id));cur.variant=bd.variants[0].id;save();};
+$('ladd').onclick=()=>editLine(null);
+$('btbody').onclick=e=>{
+  const tr=e.target.closest('tr');if(!tr)return;const l=curBoard().lines.find(x=>x.id===tr.dataset.l),cb=e.target.closest('input[type=checkbox]');
+  if(cb){const v=cb.dataset.v;l.fitted=cb.checked?[...new Set([...l.fitted,v])]:l.fitted.filter(x=>x!==v);save();return;}
+  editLine(l);
+};
+$('badd').onclick=()=>{const bs=F[MAN].boards;if(!bs.length){alert('Create a board first.');return;}F[BLD].builds.push({id:uid(),board:bs[0].id,variant:F[bf(bs[0].id)].variants[0].id,count:1,note:''});save();};
+$('bld').onchange=e=>{const tr=e.target.closest('tr');if(!tr)return;const b=F[BLD].builds.find(x=>x.id===tr.dataset.id),k=e.target.dataset.k;b[k]=k==='count'?num(e.target.value):e.target.value;if(k==='board')b.variant=F[bf(b.board)].variants[0].id;save();};
+$('bld').onclick=e=>{if(e.target.dataset.a==='del'){const id=e.target.closest('tr').dataset.id;F[BLD].builds=F[BLD].builds.filter(x=>x.id!==id);save();}};
+$('shopCsv').onclick=()=>{const s=data.schema,q=v=>`"${String(v??'').replace(/"/g,'""')}"`;download('shopping-list.csv',[[...s.fields.map(f=>f.label),'Needed','To order'].map(q).join(','),...data.items.filter(isShort).map(it=>[...s.fields.map(f=>it[f.key]),need(it),need(it)-num(it[s.haveKey])].map(q).join(','))].join('\n'),'text/csv');};
+['parts','boards','builds'].forEach(t=>$('tab-'+t).onclick=()=>{tab=t;render();});
+const safeUrl=u=>{try{const x=new URL(u);return/^https?:$/.test(x.protocol)?x.href:null;}catch{return null;}};
+const cell=(f,it)=>{const v=it[f.key];if(f.type==='url'){const u=v&&safeUrl(v);return u?`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(f.label)}</a>`:esc(v);}return esc(v);};
+
+init();
+</script>
+</body>
+</html>

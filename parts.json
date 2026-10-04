@@ -1,0 +1,91 @@
+{
+  "schema": {
+    "project": "My PCB project",
+    "haveKey": "onhand",
+    "fields": [
+      {
+        "key": "value",
+        "label": "Value",
+        "type": "text"
+      },
+      {
+        "key": "mpn",
+        "label": "MPN",
+        "type": "text"
+      },
+      {
+        "key": "package",
+        "label": "Package",
+        "type": "text"
+      },
+      {
+        "key": "supplier",
+        "label": "Supplier",
+        "type": "select",
+        "options": [
+          "Digi-Key",
+          "Mouser",
+          "LCSC",
+          "Other"
+        ]
+      },
+      {
+        "key": "datasheet",
+        "label": "Datasheet",
+        "type": "url"
+      },
+      {
+        "key": "onhand",
+        "label": "On hand",
+        "type": "number"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "type": "text"
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "p1",
+      "value": "100nF",
+      "mpn": "CL05B104KO5NNNC",
+      "package": "0402",
+      "supplier": "LCSC",
+      "datasheet": "",
+      "onhand": 40,
+      "notes": "Decoupling"
+    },
+    {
+      "id": "p2",
+      "value": "STM32G031K8T6",
+      "mpn": "STM32G031K8T6",
+      "package": "LQFP-32",
+      "supplier": "Digi-Key",
+      "datasheet": "https://www.st.com/resource/en/datasheet/stm32g031k8.pdf",
+      "onhand": 0,
+      "notes": "Main MCU"
+    },
+    {
+      "id": "p3",
+      "value": "10k",
+      "mpn": "RC0402FR-0710KL",
+      "package": "0402",
+      "supplier": "Mouser",
+      "datasheet": "",
+      "onhand": 4,
+      "notes": ""
+    },
+    {
+      "id": "p4",
+      "value": "4.7k",
+      "mpn": "RC0402FR-074K7L",
+      "package": "0402",
+      "supplier": "Mouser",
+      "datasheet": "",
+      "onhand": 50,
+      "notes": ""
+    }
+  ]
+}

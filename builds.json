@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "id": "b1",
+      "board": "demo",
+      "variant": "std",
+      "count": 10,
+      "note": "First batch"
+    },
+    {
+      "id": "b2",
+      "board": "demo",
+      "variant": "lp",
+      "count": 5,
+      "note": ""
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "project": "My PCB project",
+  "boards": [
+    {
+      "id": "demo",
+      "name": "Sensor board"
+    }
+  ]
+}
