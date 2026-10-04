@@ -4,15 +4,7 @@ A PCB component inventory management web application.
 
 ## GitHub Pages
 
-This app is hosted on GitHub Pages. To enable GitHub Pages for this repository:
-
-1. Go to your repository on GitHub
-2. Click **Settings** > **Pages**
-3. Under **Source**, select **Deploy from a branch**
-4. Choose the **main** branch and the **/(root)** folder
-5. Click **Save**
-
-The app will be available at `https://<username>.github.io/parts-inventory/`
+This app is hosted on GitHub Pages at `https://brianfranklin21.github.io/parts-inventory/`
 
 ## Usage
 
