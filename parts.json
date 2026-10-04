@@ -1,6 +1,6 @@
 {
   "schema": {
-    "project": "My PCB project",
+    "project": "NCC1U EDU rev-A dash-1",
     "haveKey": "onhand",
     "fields": [
       {
@@ -25,7 +25,8 @@
         "options": [
           "Digi-Key",
           "Mouser",
-          "LCSC",
+          "Microchip",
+          "Frontgrade",
           "Other"
         ]
       },
@@ -52,7 +53,7 @@
       "value": "100nF",
       "mpn": "CL05B104KO5NNNC",
       "package": "0402",
-      "supplier": "LCSC",
+      "supplier": "Digi-Key",
       "datasheet": "",
       "onhand": 40,
       "notes": "Decoupling"
