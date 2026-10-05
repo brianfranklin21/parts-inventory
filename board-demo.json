@@ -1,14 +1,18 @@
 {
   "id": "demo",
-  "name": "Sensor board",
+  "name": "NCC1U EDU rev A",
   "variants": [
     {
       "id": "std",
-      "name": "Standard"
+      "name": "0C to 85C (-1)"
     },
     {
       "id": "lp",
-      "name": "Low power"
+      "name": "Standard (-2)"
+    },
+    {
+      "id": "vtbv32fx",
+      "name": "Fabric DDR (-3)"
     }
   ],
   "lines": [
@@ -19,7 +23,8 @@
       "qty": 12,
       "fitted": [
         "std",
-        "lp"
+        "lp",
+        "vtbv32fx"
       ]
     },
     {
@@ -29,7 +34,8 @@
       "qty": 1,
       "fitted": [
         "std",
-        "lp"
+        "lp",
+        "vtbv32fx"
       ]
     },
     {
@@ -39,7 +45,8 @@
       "qty": 4,
       "fitted": [
         "std",
-        "lp"
+        "lp",
+        "vtbv32fx"
       ]
     },
     {
@@ -57,7 +64,8 @@
       "partId": "p4",
       "qty": 1,
       "fitted": [
-        "lp"
+        "lp",
+        "vtbv32fx"
       ]
     }
   ]

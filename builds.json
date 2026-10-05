@@ -4,15 +4,22 @@
       "id": "b1",
       "board": "demo",
       "variant": "std",
-      "count": 10,
+      "count": 4,
       "note": "First batch"
     },
     {
       "id": "b2",
       "board": "demo",
       "variant": "lp",
-      "count": 5,
-      "note": ""
+      "count": 6,
+      "note": "Second batch"
+    },
+    {
+      "id": "pho536k",
+      "board": "demo",
+      "variant": "vtbv32fx",
+      "count": 2,
+      "note": "for UCIS Moon"
     }
   ]
 }

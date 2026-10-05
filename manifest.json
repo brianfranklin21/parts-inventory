@@ -3,7 +3,11 @@
   "boards": [
     {
       "id": "demo",
-      "name": "Sensor board"
+      "name": "NCC1U EDU rev A"
+    },
+    {
+      "id": "ticuu91",
+      "name": "NCC1U EDU rev B"
     }
   ]
 }
