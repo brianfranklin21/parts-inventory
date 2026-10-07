@@ -4,7 +4,7 @@ A PCB component inventory management web application.
 
 ## GitHub Pages
 
-This app is hosted on GitHub Pages at `https://brianfranklin21.github.io/parts-inventory/`
+This app is hosted on GitHub Pages at <https://brianfranklin21.github.io/parts-inventory/>
 
 ## Usage
 
